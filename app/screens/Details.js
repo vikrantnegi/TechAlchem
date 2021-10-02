@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import moment from 'moment';
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, useMemo, useCallback} from 'react';
 import {
   View,
   Text,
@@ -15,13 +15,13 @@ import {
   StyleSheet,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
-import BottomSheet from 'reanimated-bottom-sheet';
 import LaunchNavigator from 'react-native-launch-navigator';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import {ScrollView} from 'react-native-gesture-handler';
 import {colorCode} from '../designs/colors';
 import {styles} from '../designs/styles';
 import {apiConfig} from '../utils/constants';
+import BottomSheet from '@gorhom/bottom-sheet';
 
 const slideWidth = 340;
 const BANNER_H = 400;
@@ -37,6 +37,13 @@ export default function Details({route, navigation}) {
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const scrollA = useRef(new Animated.Value(0)).current;
+  const bottomSheetRef = useRef(null);
+  const snapPoints = useMemo(() => ['25%', '50%', '75%'], []);
+
+  // callbacks
+  const handleSheetChanges = useCallback(index => {
+    console.log('handleSheetChanges', index);
+  }, []);
 
   const renderContent = () => (
     <View
@@ -509,7 +516,7 @@ export default function Details({route, navigation}) {
         </View>
         <Button
           title="Open Bottom Sheet"
-          onPress={() => sheetRef.current.snapTo(0)}
+          onPress={() => bottomSheetRef.current.snapToPosition('75%')}
         />
         <View style={styles.purchaseCard}>
           <View style={[styles.row, styles.btw]}>
@@ -623,6 +630,19 @@ export default function Details({route, navigation}) {
         </View>
         {renderContent()}
       </Animated.ScrollView>
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={-1}
+        snapPoints={snapPoints}
+        enableContentPanningGesture
+        enableOverDrag
+        enablePanDownToClose
+        enableHandlePanningGesture
+        onChange={handleSheetChanges}>
+        <View style={styles.contentContainer}>
+          <Text>Awesome 🎉</Text>
+        </View>
+      </BottomSheet>
     </View>
   );
 }
